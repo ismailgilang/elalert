@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ElAlert — Beautiful, Accessible Dialogs</title>
+  <meta name="description"
+    content="A zero-dependency, framework-agnostic dialog library with full TypeScript support, built-in accessibility, and a tiny footprint.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../../src/theme/tokens.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+          colors: {
+            brand: { DEFAULT: '#6366f1', light: '#818cf8', dark: '#4f46e5' },
+          },
+          animation: {
+            'float': 'float 8s ease-in-out infinite',
+            'float-rev': 'float 10s ease-in-out infinite reverse',
+            'fade-up': 'fadeUp 0.6s cubic-bezier(0.4,0,0.2,1) both',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0) scale(1)' },
+              '50%': { transform: 'translateY(-24px) scale(1.04)' },
+            },
+            fadeUp: {
+              from: { opacity: '0', transform: 'translateY(20px)' },
+              to: { opacity: '1', transform: 'translateY(0)' },
+            },
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Theme toggle SVG animation */
+    #theme-toggle-btn {
+      font-size: 11px;
+      position: relative;
+      display: inline-block;
+      width: 7em;
+      cursor: pointer;
+      line-height: 0;
+    }
+
+    #theme-chk {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    #tc-container,
+    #tc-patches,
+    #tc-stars,
+    #tc-button,
+    #tc-sun,
+    #tc-moon,
+    #tc-cloud {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #theme-chk:checked+svg #tc-container {
+      fill: #2b4360;
+    }
+
+    #theme-chk:checked+svg #tc-button {
+      transform: translate(28px, 2.333px);
+    }
+
+    #tc-sun {
+      opacity: 1;
+    }
+
+    #theme-chk:checked+svg #tc-sun {
+      opacity: 0;
+    }
+
+    #tc-moon {
+      opacity: 0;
+    }
+
+    #theme-chk:checked+svg #tc-moon {
+      opacity: 1;
+    }
+
+    #tc-cloud {
+      opacity: 1;
+    }
+
+    #theme-chk:checked+svg #tc-cloud {
+      opacity: 0;
+    }
+
+    #tc-stars {
+      opacity: 0;
+    }
+
+    #theme-chk:checked+svg #tc-stars {
+      opacity: 1;
+    }
+
+    /* Playground dialog-theme toggle */
+    .dlg-toggle button.active {
+      background: rgba(99, 102, 241, 0.2);
+      color: #818cf8;
+    }
+
+    /* Position grid active */
+    .pos-grid button.active {
+      background: rgba(99, 102, 241, 0.25);
+      border-color: #6366f1;
+      color: #818cf8;
+    }
+
+    /* Background grid */
+    .hero-grid {
+      background-image:
+        linear-gradient(rgba(99, 102, 241, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99, 102, 241, 0.07) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 20%, transparent 100%);
+    }
+
+    /* Light mode grid */
+    html:not(.dark) .hero-grid {
+      background-image:
+        linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+    }
+
+    /* Smooth theme transition */
+    *,
+    *::before,
+    *::after {
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Code block scrollbar */
+    pre::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    pre::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    pre::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 2px;
+    }
+
+    /* Delay helpers */
+    .delay-100 {
+      animation-delay: 0.1s;
+    }
+
+    .delay-200 {
+      animation-delay: 0.2s;
+    }
+
+    .delay-300 {
+      animation-delay: 0.3s;
+    }
+
+    .delay-400 {
+      animation-delay: 0.4s;
+    }
+
+    .delay-500 {
+      animation-delay: 0.5s;
+    }
+  </style>
+</head>
+
+<body class="font-sans bg-white dark:bg-[#050510] text-slate-900 dark:text-slate-100 min-h-screen overflow-x-hidden">
+
+  <!-- ======================== NAV ======================== -->
+  <nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between gap-4 px-6 md:px-10 h-16
+              bg-white/80 dark:bg-[#050510]/80 backdrop-blur-xl
+              border-b border-slate-200 dark:border-white/[0.08]">
+    <a href="#"
+      class="flex items-center gap-2.5 font-extrabold text-[1.05rem] tracking-tight no-underline text-slate-900 dark:text-slate-100">
+      <div
+        class="w-8 h-8 rounded-lg flex items-center justify-center text-base bg-gradient-to-br from-indigo-500 to-purple-600">
+        ✨</div>
+      ElAlert
+      <span class="text-[0.7rem] font-semibold px-2 py-0.5 rounded-full
+                   bg-indigo-100 text-indigo-600 border border-indigo-200
+                   dark:bg-indigo-500/10 dark:text-indigo-300 dark:border-indigo-500/30">v0.1.0</span>
+    </a>
+
+    <div class="flex items-center gap-3">
+      <a href="#playground" class="hidden sm:flex items-center px-4 py-2 rounded-xl text-sm font-semibold
+                                   border border-slate-200 dark:border-white/[0.12]
+                                   text-slate-700 dark:text-slate-300
+                                   hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-all">
+        Playground
+      </a>
+
+      <!-- Animated Day/Night Toggle -->
+      <label id="theme-toggle-btn" title="Toggle theme">
+        <input type="checkbox" id="theme-chk">
+        <svg viewBox="0 0 69.667 44" xmlns="http://www.w3.org/2000/svg">
+          <g transform="translate(3.5 3.5)">
+            <g transform="matrix(1,0,0,1,-3.5,-3.5)">
+              <rect fill="#83cbd8" transform="translate(3.5 3.5)" rx="17.5" height="35" width="60.667"
+                id="tc-container"></rect>
+            </g>
+            <g transform="translate(2.333 2.333)" id="tc-button">
+              <g id="tc-sun">
+                <g transform="matrix(1,0,0,1,-5.83,-5.83)">
+                  <circle fill="#f8e664" transform="translate(5.83 5.83)" r="15.167" cy="15.167" cx="15.167"></circle>
+                </g>
+                <g transform="matrix(1,0,0,1,-5.83,-5.83)">
+                  <path fill="rgba(246,254,247,0.29)" transform="translate(9.33 9.33)"
+                    d="M11.667,0A11.667,11.667,0,1,1,0,11.667,11.667,11.667,0,0,1,11.667,0Z"></path>
+                </g>
+                <circle fill="#fcf4b9" transform="translate(8.167 8.167)" r="7" cy="7" cx="7"></circle>
+              </g>
+              <g id="tc-moon">
+                <g transform="matrix(1,0,0,1,-31.5,-5.83)">
+                  <circle fill="#cce6ee" transform="translate(31.5 5.83)" r="15.167" cy="15.167" cx="15.167"></circle>
+                </g>
+                <g fill="#a6cad0" transform="translate(-24.415 -1.009)" id="tc-patches">
+                  <circle transform="translate(43.009 4.496)" r="2" cy="2" cx="2"></circle>
+                  <circle transform="translate(39.366 17.952)" r="2" cy="2" cx="2"></circle>
+                  <circle transform="translate(33.016 8.044)" r="1" cy="1" cx="1"></circle>
+                  <circle transform="translate(51.081 18.888)" r="1" cy="1" cx="1"></circle>
+                  <circle transform="translate(33.016 22.503)" r="1" cy="1" cx="1"></circle>
+                  <circle transform="translate(50.081 10.53)" r="1.5" cy="1.5" cx="1.5"></circle>
+                </g>
+              </g>
+            </g>
+            <g transform="matrix(1,0,0,1,-3.5,-3.5)" id="tc-cloud">
+              <path fill="#fff" transform="translate(-3466.47 -160.94)"
+                d="M3512.81,173.815a4.463,4.463,0,0,1,2.243.62.95.95,0,0,1,.72-1.281,4.852,4.852,0,0,1,2.623.519c.034.02-.5-1.968.281-2.716a2.117,2.117,0,0,1,2.829-.274,1.821,1.821,0,0,1,.854,1.858c.063.037,2.594-.049,3.285,1.273s-.865,2.544-.807,2.626a12.192,12.192,0,0,1,2.278.892c.553.448,1.106,1.992-1.62,2.927a7.742,7.742,0,0,1-3.762-.3c-1.28-.49-1.181-2.65-1.137-2.624s-1.417,2.2-2.623,2.2a4.172,4.172,0,0,1-2.394-1.206,3.825,3.825,0,0,1-2.771.774c-3.429-.46-2.333-3.267-2.2-3.55A3.721,3.721,0,0,1,3512.81,173.815Z">
+              </path>
+            </g>
+            <g fill="#def8ff" transform="translate(3.585 1.325)" id="tc-stars">
+              <path transform="matrix(-1, 0.017, -0.017, -1, 24.231, 3.055)"
+                d="M.774,0,.566.559,0,.539.458.933.25,1.492l.485-.361.458.394L1.024.953,1.509.592.943.572Z"></path>
+              <path transform="matrix(-0.777, 0.629, -0.629, -0.777, 23.185, 12.358)"
+                d="M1.341.529.836.472.736,0,.505.46,0,.4.4.729l-.231.46L.605.932l.4.326L.9.786Z"></path>
+              <path transform="matrix(0.438, 0.899, -0.899, 0.438, 23.177, 29.735)"
+                d="M.015,1.065.475.9l.285.365L.766.772l.46-.164L.745.494.751,0,.481.407,0,.293.285.658Z"></path>
+              <path transform="translate(12.677 0.388) rotate(104)"
+                d="M1.161,1.6,1.059,1,1.574.722.962.607.86,0,.613.572,0,.457.446.881.2,1.454l.516-.274Z"></path>
+              <path transform="matrix(-0.07, 0.998, -0.998, -0.07, 11.066, 15.457)"
+                d="M.873,1.648l.114-.62L1.579.945,1.03.62,1.144,0,.706.464.157.139.438.7,0,1.167l.592-.083Z"></path>
+              <path transform="translate(8.326 28.061) rotate(11)"
+                d="M.593,0,.638.724,0,.982l.7.211.045.724.36-.64.7.211L1.342.935,1.7.294,1.063.552Z"></path>
+              <path transform="translate(5.012 5.962) rotate(172)"
+                d="M.816,0,.5.455,0,.311.323.767l-.312.455.516-.215.323.456L.827.911,1.343.7.839.552Z"></path>
+              <path transform="translate(2.218 14.616) rotate(169)"
+                d="M1.261,0,.774.571.114.3.487.967,0,1.538.728,1.32l.372.662.047-.749.728-.218L1.215.749Z"></path>
+            </g>
+          </g>
+        </svg>
+      </label>
+
+      <button
+        onclick="Dialog.success({ title:'Hei! 👋', message:'Terima kasih sudah mencoba ElAlert!', autoClose: 3000, showConfirmButton: false })"
+        class="px-4 py-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-indigo-500 to-purple-600
+                     hover:shadow-lg hover:shadow-indigo-500/25 hover:-translate-y-0.5 transition-all">
+        Try It
+      </button>
+    </div>
+  </nav>
+
+  <!-- ======================== HERO ======================== -->
+  <section class="relative min-h-screen flex items-center justify-center text-center px-6 pt-28 pb-20 overflow-hidden">
+    <!-- Grid bg -->
+    <div class="hero-grid absolute inset-0 pointer-events-none"></div>
+    <!-- Orbs -->
+    <div
+      class="absolute w-96 h-96 rounded-full blur-[80px] bg-indigo-500/20 top-[10%] left-[5%] animate-float pointer-events-none">
+    </div>
+    <div
+      class="absolute w-80 h-80 rounded-full blur-[80px] bg-purple-500/15 bottom-[10%] right-[5%] animate-float-rev pointer-events-none">
+    </div>
+    <!-- Glow center -->
+    <div
+      class="absolute w-[700px] h-[700px] rounded-full bg-radial-[at_50%_50%] from-indigo-500/10 to-transparent top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+    </div>
+
+    <div class="relative z-10 max-w-3xl">
+      <!-- Badge -->
+      <div class="animate-fade-up delay-100 inline-flex items-center gap-2 mb-8 px-1 pr-4 py-1 rounded-full
+                  bg-indigo-50 border border-indigo-200 dark:bg-indigo-500/10 dark:border-indigo-500/30">
+        <span
+          class="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs">🎉</span>
+        <span class="text-sm font-semibold text-indigo-600 dark:text-indigo-300">Zero dependency · TypeScript-first ·
+          ~3KB gzipped</span>
+      </div>
+
+      <h1
+        class="animate-fade-up delay-200 text-[clamp(3rem,7vw,5.5rem)] font-black tracking-[-0.04em] leading-[1.05] mb-6">
+        ElAlert —<br>
+        <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          Dialogs That Shine
+        </span>
+      </h1>
+
+      <p
+        class="animate-fade-up delay-300 text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto mb-10 leading-relaxed">
+        Beautiful, accessible dialogs that work everywhere — Vanilla JS, React, Vue, Svelte, Next.js. One clean API,
+        zero compromises.
+      </p>
+
+      <div class="animate-fade-up delay-400 flex gap-3 justify-center flex-wrap mb-16">
+        <button onclick="demoQuickStart()" class="flex items-center gap-2 px-7 py-3.5 rounded-xl text-base font-bold text-white
+                       bg-gradient-to-r from-indigo-500 to-purple-600
+                       shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50
+                       hover:-translate-y-0.5 transition-all duration-200">
+          <span>⚡</span> See It in Action
+        </button>
+        <a href="#playground" class="flex items-center gap-2 px-7 py-3.5 rounded-xl text-base font-bold
+                  border border-slate-300 dark:border-white/[0.15]
+                  text-slate-700 dark:text-slate-300
+                  hover:bg-slate-100 dark:hover:bg-white/[0.06] hover:-translate-y-0.5 transition-all">
+          <span>🎮</span> Open Playground
+        </a>
+      </div>
+
+      <!-- Stats -->
+      <div
+        class="animate-fade-up delay-500 grid grid-cols-2 sm:grid-cols-4 gap-8 border-t border-slate-200 dark:border-white/[0.08] pt-10">
+        <div>
+          <div class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">&lt;3KB</div>
+          <div class="text-sm text-slate-500 dark:text-slate-500 mt-1">Gzipped core</div>
+        </div>
+        <div>
+          <div class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">0</div>
+          <div class="text-sm text-slate-500 dark:text-slate-500 mt-1">Dependencies</div>
+        </div>
+        <div>
+          <div class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">9</div>
+          <div class="text-sm text-slate-500 dark:text-slate-500 mt-1">Dialog positions</div>
+        </div>
+        <div>
+          <div class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">A11y</div>
+          <div class="text-sm text-slate-500 dark:text-slate-500 mt-1">By default</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== FEATURES ======================== -->
+  <section class="max-w-6xl mx-auto px-6 py-24">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-6 h-0.5 rounded bg-indigo-500"></div>
+      <span class="text-xs font-bold tracking-[0.1em] uppercase text-indigo-500 dark:text-indigo-400">Why ElAlert</span>
+    </div>
+    <h2 class="text-[clamp(2rem,4vw,3rem)] font-extrabold tracking-tight leading-tight mb-4">
+      Everything you need.<br>Nothing you don't.
+    </h2>
+    <p class="text-lg text-slate-500 dark:text-slate-400 mb-16 max-w-lg">Built from the ground up to solve the real
+      problems with existing dialog libraries.</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Feature cards -->
+      <div
+        class="group p-7 rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.03]
+                  hover:border-indigo-300 dark:hover:border-indigo-500/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10 transition-all">
+        <div
+          class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-500/15 flex items-center justify-center text-2xl mb-5">
+          ♿</div>
+        <h3 class="text-base font-bold mb-2">Accessible by Default</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Full focus trap, ARIA attributes, ESC key
+          handling, and reduced-motion support — not as an afterthought, but as the foundation.</p>
+      </div>
+      <div
+        class="group p-7 rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.03]
+                  hover:border-emerald-300 dark:hover:border-emerald-500/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 transition-all">
+        <div
+          class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/15 flex items-center justify-center text-2xl mb-5">
+          🌳</div>
+        <h3 class="text-base font-bold mb-2">Tree-Shakeable</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Import only what you use. The confirm,
+          loading spinner, and custom dialog are independently bundled — your users only pay for what you use.</p>
+      </div>
+      <div
+        class="group p-7 rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.03]
+                  hover:border-amber-300 dark:hover:border-amber-500/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10 transition-all">
+        <div
+          class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/15 flex items-center justify-center text-2xl mb-5">
+          🔷</div>
+        <h3 class="text-base font-bold mb-2">TypeScript-First</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Native strict TypeScript with full type
+          inference. Your IDE autocompletes every option — zero configuration needed.</p>
+      </div>
+      <div
+        class="group p-7 rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.03]
+                  hover:border-purple-300 dark:hover:border-purple-500/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/10 transition-all">
+        <div
+          class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/15 flex items-center justify-center text-2xl mb-5">
+          🎨</div>
+        <h3 class="text-base font-bold mb-2">Fully Customizable</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Override anything with CSS custom
+          properties. Light/dark/auto mode, 9 positional slots, and custom render functions.</p>
+      </div>
+      <div
+        class="group p-7 rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.03]
+                  hover:border-sky-300 dark:hover:border-sky-500/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-sky-500/10 transition-all">
+        <div class="w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-500/15 flex items-center justify-center text-2xl mb-5">⚡
+        </div>
+        <h3 class="text-base font-bold mb-2">Framework-Agnostic</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Works identically in Vanilla JS, React,
+          Vue, Svelte, Next.js, and Laravel Blade. One library, every stack.</p>
+      </div>
+      <div
+        class="group p-7 rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.03]
+                  hover:border-rose-300 dark:hover:border-rose-500/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-500/10 transition-all">
+        <div
+          class="w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-500/15 flex items-center justify-center text-2xl mb-5">📋
+        </div>
+        <h3 class="text-base font-bold mb-2">Smart Queue System</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Multiple dialogs? Built-in queue ensures
+          they appear one at a time, never overlapping or competing for attention.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== CODE ======================== -->
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="h-px bg-gradient-to-r from-transparent via-slate-300 dark:via-white/[0.08] to-transparent"></div>
+  </div>
+  <section class="max-w-6xl mx-auto px-6 py-24">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-6 h-0.5 rounded bg-indigo-500"></div>
+      <span class="text-xs font-bold tracking-[0.1em] uppercase text-indigo-500 dark:text-indigo-400">Simple API</span>
+    </div>
+    <h2 class="text-[clamp(2rem,4vw,3rem)] font-extrabold tracking-tight leading-tight mb-12">From zero to dialog<br>in
+      3 lines.</h2>
+
+    <div
+      class="rounded-2xl overflow-hidden border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-[#0a0a1a]">
+      <div
+        class="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#0f0f23]">
+        <span class="font-mono text-xs text-slate-400">typescript</span>
+        <button onclick="copyCode()"
+          class="font-mono text-xs text-slate-400 hover:text-indigo-500 border border-slate-200 dark:border-white/[0.1] px-2.5 py-1 rounded-md transition-colors"
+          id="copy-btn">Copy</button>
+      </div>
+      <pre class="p-6 font-mono text-sm leading-[1.8] overflow-x-auto" id="code-sample"><span class="text-purple-400">import</span> { <span class="text-blue-400">Dialog</span> } <span class="text-purple-400">from</span> <span class="text-emerald-400">'@maellana25/elalert'</span>;
+<span class="text-purple-400">import</span> <span class="text-emerald-400">'@maellana25/elalert/style.css'</span>;
+
+<span class="text-slate-500">// ✅ Simple alert</span>
+<span class="text-blue-400">Dialog</span>.<span class="text-blue-400">success</span>(<span class="text-emerald-400">'Data saved successfully!'</span>);
+
+<span class="text-slate-500">// ✅ Async confirm with full type safety</span>
+<span class="text-purple-400">const</span> result = <span class="text-purple-400">await</span> <span class="text-blue-400">Dialog</span>.<span class="text-blue-400">confirm</span>({
+  <span class="text-amber-400">title</span>: <span class="text-emerald-400">'Delete record?'</span>,
+  <span class="text-amber-400">message</span>: <span class="text-emerald-400">'This action cannot be undone.'</span>,
+  <span class="text-amber-400">confirmText</span>: <span class="text-emerald-400">'Yes, delete'</span>,
+});
+
+<span class="text-purple-400">if</span> (result.<span class="text-amber-400">isConfirmed</span>) {
+  <span class="text-purple-400">await</span> <span class="text-blue-400">deleteRecord</span>();
+}
+
+<span class="text-slate-500">// ✅ Loading with live update</span>
+<span class="text-purple-400">const</span> loader = <span class="text-blue-400">Dialog</span>.<span class="text-blue-400">loading</span>({ <span class="text-amber-400">message</span>: <span class="text-emerald-400">'Uploading...'</span> });
+<span class="text-purple-400">await</span> <span class="text-blue-400">upload</span>();
+loader.<span class="text-blue-400">close</span>();</pre>
+    </div>
+  </section>
+
+  <!-- ======================== PLAYGROUND ======================== -->
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="h-px bg-gradient-to-r from-transparent via-slate-300 dark:via-white/[0.08] to-transparent"></div>
+  </div>
+  <section id="playground" class="max-w-6xl mx-auto px-6 py-24">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-6 h-0.5 rounded bg-indigo-500"></div>
+      <span class="text-xs font-bold tracking-[0.1em] uppercase text-indigo-500 dark:text-indigo-400">Interactive
+        Playground</span>
+    </div>
+    <h2 class="text-[clamp(2rem,4vw,3rem)] font-extrabold tracking-tight leading-tight mb-4">Try every feature,<br>right
+      here.</h2>
+    <p class="text-lg text-slate-500 dark:text-slate-400 mb-12 max-w-lg">Click any button to see a live dialog. Adjust
+      the dialog theme and position controls to explore every combination.</p>
+
+    <div
+      class="rounded-3xl overflow-hidden border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#0a0a1a]">
+      <!-- Toolbar -->
+      <div
+        class="flex items-center justify-between flex-wrap gap-3 px-6 py-4 border-b border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-[#0f0f23]">
+        <div class="flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+          <span class="font-mono text-xs text-slate-400 ml-2">elalert/playground</span>
+        </div>
+        <!-- Dialog theme toggle (separate from page theme) -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-400 font-semibold">Dialog theme:</span>
+          <div
+            class="dlg-toggle flex bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] p-1 rounded-lg gap-1">
+            <button id="dlg-theme-system" onclick="setDlgTheme('system')"
+              class="active text-xs font-semibold px-3 py-1.5 rounded-md text-slate-600 dark:text-slate-400 transition-all">System</button>
+            <button id="dlg-theme-light" onclick="setDlgTheme('light')"
+              class="text-xs font-semibold px-3 py-1.5 rounded-md text-slate-600 dark:text-slate-400 transition-all">Light</button>
+            <button id="dlg-theme-dark" onclick="setDlgTheme('dark')"
+              class="text-xs font-semibold px-3 py-1.5 rounded-md text-slate-600 dark:text-slate-400 transition-all">Dark</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-8 md:p-10 space-y-10">
+        <!-- Basic States -->
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-xs font-bold tracking-[0.08em] uppercase text-slate-400">Basic States</span>
+            <div class="flex-1 h-px bg-slate-200 dark:bg-white/[0.06]"></div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            <button
+              onclick="Dialog.alert({ title: 'Alert', message: 'Generic alert without an icon.', onClose: showResult })"
+              class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all duration-200 cursor-pointer shadow-sm bg-white border border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-300"><span class="text-lg">🔔</span>Alert</button>
+            <button
+              onclick="Dialog.success({ title: 'Success!', message: 'Your changes have been saved.', onClose: showResult })"
+              class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all duration-200 cursor-pointer shadow-sm bg-white border border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-300"><span class="text-lg">✅</span>Success</button>
+            <button
+              onclick="Dialog.error({ title: 'Error', message: 'Connection failed. Please try again.', onClose: showResult })"
+              class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all duration-200 cursor-pointer shadow-sm bg-white border border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-300"><span class="text-lg">❌</span>Error</button>
+            <button
+              onclick="Dialog.warning({ title: 'Warning', message: '5 login attempts remaining before lockout.', onClose: showResult })"
+              class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all duration-200 cursor-pointer shadow-sm bg-white border border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-300"><span class="text-lg">⚠️</span>Warning</button>
+            <button
+              onclick="Dialog.info({ title: 'Info', message: 'Scheduled maintenance on Sunday at 2:00 AM.', onClose: showResult })"
+              class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all duration-200 cursor-pointer shadow-sm bg-white border border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-300"><span class="text-lg">ℹ️</span>Info</button>
+          </div>
+        </div>
+
+        <!-- Advanced -->
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-xs font-bold tracking-[0.08em] uppercase text-slate-400">Advanced & Async</span>
+            <div class="flex-1 h-px bg-slate-200 dark:bg-white/[0.06]"></div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <button onclick="demoConfirm()" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all duration-200 cursor-pointer shadow-sm bg-white border border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-300"><span
+                class="text-lg">❓</span>Confirm</button>
+            <button onclick="demoLoading()" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all duration-200 cursor-pointer shadow-sm bg-white border border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-300"><span
+                class="text-lg">⏳</span>Loading</button>
+            <button onclick="demoCustom()" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all duration-200 cursor-pointer shadow-sm bg-white border border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-300"><span
+                class="text-lg">🎨</span>Custom</button>
+            <button onclick="demoAutoClose()" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all duration-200 cursor-pointer shadow-sm bg-white border border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-300"><span
+                class="text-lg">⏱️</span>Auto Close</button>
+            <button onclick="demoNoBtn()" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all duration-200 cursor-pointer shadow-sm bg-white border border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-300"><span class="text-lg">👻</span>No Button</button>
+            <button onclick="demoQueue()" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all duration-200 cursor-pointer shadow-sm bg-white border border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-300"><span
+                class="text-lg">📋</span>Queue</button>
+          </div>
+        </div>
+
+        <!-- Positions -->
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-xs font-bold tracking-[0.08em] uppercase text-slate-400">Default Position</span>
+            <div class="flex-1 h-px bg-slate-200 dark:bg-white/[0.06]"></div>
+          </div>
+          <div class="flex items-center gap-6 flex-wrap">
+            <div
+              class="pos-grid grid grid-cols-3 gap-1.5 p-2.5 rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.02]">
+              <button id="pos-top-left" onclick="setPos('top-left')" title="Top Left"
+                class="w-9 h-9 rounded-lg border border-slate-200 dark:border-white/[0.1] bg-white dark:bg-white/[0.04] text-slate-500 dark:text-slate-500 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-sm transition-all">↖</button>
+              <button id="pos-top" onclick="setPos('top')" title="Top"
+                class="w-9 h-9 rounded-lg border border-slate-200 dark:border-white/[0.1] bg-white dark:bg-white/[0.04] text-slate-500 dark:text-slate-500 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-sm transition-all">↑</button>
+              <button id="pos-top-right" onclick="setPos('top-right')" title="Top Right"
+                class="w-9 h-9 rounded-lg border border-slate-200 dark:border-white/[0.1] bg-white dark:bg-white/[0.04] text-slate-500 dark:text-slate-500 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-sm transition-all">↗</button>
+              <button id="pos-center-left" onclick="setPos('center-left')" title="Center Left"
+                class="w-9 h-9 rounded-lg border border-slate-200 dark:border-white/[0.1] bg-white dark:bg-white/[0.04] text-slate-500 dark:text-slate-500 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-sm transition-all">←</button>
+              <button id="pos-center" onclick="setPos('center')" title="Center"
+                class="w-9 h-9 rounded-lg border border-slate-200 dark:border-white/[0.1] bg-white dark:bg-white/[0.04] text-slate-500 dark:text-slate-500 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-sm transition-all active">●</button>
+              <button id="pos-center-right" onclick="setPos('center-right')" title="Center Right"
+                class="w-9 h-9 rounded-lg border border-slate-200 dark:border-white/[0.1] bg-white dark:bg-white/[0.04] text-slate-500 dark:text-slate-500 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-sm transition-all">→</button>
+              <button id="pos-bottom-left" onclick="setPos('bottom-left')" title="Bottom Left"
+                class="w-9 h-9 rounded-lg border border-slate-200 dark:border-white/[0.1] bg-white dark:bg-white/[0.04] text-slate-500 dark:text-slate-500 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-sm transition-all">↙</button>
+              <button id="pos-bottom" onclick="setPos('bottom')" title="Bottom"
+                class="w-9 h-9 rounded-lg border border-slate-200 dark:border-white/[0.1] bg-white dark:bg-white/[0.04] text-slate-500 dark:text-slate-500 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-sm transition-all">↓</button>
+              <button id="pos-bottom-right" onclick="setPos('bottom-right')" title="Bottom Right"
+                class="w-9 h-9 rounded-lg border border-slate-200 dark:border-white/[0.1] bg-white dark:bg-white/[0.04] text-slate-500 dark:text-slate-500 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-sm transition-all">↘</button>
+            </div>
+            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              Select a cell — all dialogs above<br>will appear from that corner or edge.
+            </p>
+          </div>
+        </div>
+
+        <!-- Console -->
+        <div class="rounded-xl overflow-hidden bg-[#030308] border border-white/[0.06]">
+          <div class="flex items-center gap-1.5 px-4 py-2.5 border-b border-white/[0.06]">
+            <div class="w-2.5 h-2.5 rounded-full bg-red-400/80"></div>
+            <div class="w-2.5 h-2.5 rounded-full bg-amber-400/80"></div>
+            <div class="w-2.5 h-2.5 rounded-full bg-green-400/80"></div>
+            <span class="font-mono text-xs text-slate-500 ml-2">onClose callback result</span>
+          </div>
+          <code id="result"
+            class="block font-mono text-sm text-emerald-300/90 p-4 min-h-[60px] leading-relaxed whitespace-pre-wrap">// Waiting for interaction...</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== CTA ======================== -->
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="h-px bg-gradient-to-r from-transparent via-slate-300 dark:via-white/[0.08] to-transparent"></div>
+  </div>
+  <section class="text-center py-28 px-6 relative overflow-hidden">
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <div class="w-[500px] h-[500px] rounded-full bg-indigo-500/10 blur-[80px]"></div>
+    </div>
+    <div class="relative">
+      <div class="flex items-center justify-center gap-2 mb-4">
+        <div class="w-6 h-0.5 rounded bg-indigo-500"></div>
+        <span class="text-xs font-bold tracking-[0.1em] uppercase text-indigo-500 dark:text-indigo-400">Get
+          Started</span>
+        <div class="w-6 h-0.5 rounded bg-indigo-500"></div>
+      </div>
+      <h2 class="text-[clamp(2rem,4vw,3rem)] font-extrabold tracking-tight mb-4">Ready to ship beautiful dialogs?</h2>
+      <p class="text-lg text-slate-500 dark:text-slate-400 mb-10 max-w-sm mx-auto">Install once, use everywhere. No
+        framework lock-in, ever.</p>
+      <div
+        class="inline-block rounded-xl overflow-hidden border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-[#0f0f23] mb-10">
+        <pre class="px-6 py-4 font-mono text-sm"><span class="text-purple-400">npm</span> install @maellana25/elalert</pre>
+      </div>
+      <br>
+      <button onclick="demoQuickStart()" class="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-lg font-bold text-white
+              bg-gradient-to-r from-indigo-500 to-purple-600
+              shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 transition-all">
+        ⚡ See Demo
+      </button>
+    </div>
+  </section>
+
+  <!-- ======================== FOOTER ======================== -->
+  <footer
+    class="border-t border-slate-200 dark:border-white/[0.08] px-6 md:px-10 py-8 flex items-center justify-between flex-wrap gap-4">
+    <span class="font-bold text-slate-500">ElAlert</span>
+    <span class="text-sm text-slate-400">Zero dependency. TypeScript-first. Built for the web.</span>
+  </footer>
+
+
+
+  <script type="module">
+    import { Dialog } from '../../src/index.ts';
+    window.Dialog = Dialog;
+
+    /* ---- Page Theme (Day/Night toggle) ---- */
+    const toggle = document.getElementById('theme-chk');
+    // Default: dark mode (checked = night)
+    toggle.checked = true;
+    toggle.addEventListener('change', () => {
+      document.documentElement.classList.toggle('dark', toggle.checked);
+    });
+
+    /* ---- Dialog Theme (playground controls) ---- */
+    window.setDlgTheme = (theme) => {
+      document.querySelectorAll('.dlg-toggle button').forEach(b => b.classList.remove('active'));
+      document.getElementById(`dlg-theme-${theme}`).classList.add('active');
+      Dialog.setConfig({ theme: theme === 'system' ? 'auto' : theme });
+    };
+
+    /* ---- Position ---- */
+    window.setPos = (pos) => {
+      Dialog.setConfig({ position: pos });
+      document.querySelectorAll('.pos-grid button').forEach(b => b.classList.remove('active'));
+      document.getElementById(`pos-${pos}`).classList.add('active');
+    };
+
+    /* ---- Console output ---- */
+    window.showResult = (data) => {
+      const el = document.getElementById('result');
+      el.style.opacity = '0.3';
+      setTimeout(() => { el.textContent = JSON.stringify(data, null, 2); el.style.opacity = '1'; }, 80);
+    };
+
+    /* ---- Demos ---- */
+    window.demoQuickStart = () => {
+      Dialog.success({ title: 'Welcome to ElAlert 🎉', message: 'Beautiful, accessible dialogs with zero dependencies. Works in any JavaScript framework.', onClose: showResult });
+    };
+
+    window.demoConfirm = async () => {
+      const result = await Dialog.confirm({ title: 'Delete Record?', message: 'This action cannot be undone. The record will be permanently removed.', confirmText: 'Yes, delete it', cancelText: 'Cancel' });
+      showResult(result);
+      if (result.isConfirmed) Dialog.success({ title: 'Deleted', message: 'The record has been removed.', autoClose: 2000, showConfirmButton: false });
+    };
+
+    window.demoLoading = async () => {
+      const h = Dialog.loading({ message: 'Connecting to server...' });
+      await new Promise(r => setTimeout(r, 2000));
+      h.update({ message: 'Uploading data...' });
+      await new Promise(r => setTimeout(r, 1500));
+      h.close();
+      Dialog.success({ title: 'Done!', message: 'Upload completed.', autoClose: 2500, showConfirmButton: false, onClose: showResult });
+    };
+
+    window.demoCustom = () => {
+      Dialog.custom({
+        title: 'Rate your experience',
+        render: (c) => { c.innerHTML = `<div style="display:flex;gap:12px;justify-content:center;padding:16px 0">${[1, 2, 3, 4, 5].map(i => `<button onclick="[...this.parentElement.children].forEach((b,j)=>b.style.opacity=j<${i}?'1':'0.3');this.parentElement.dataset.val='${i}'" style="background:none;border:none;cursor:pointer;font-size:3rem;opacity:0.3;transition:all 0.2s" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'">⭐</button>`).join('')}</div><p style="text-align:center;font-size:0.9rem;color:#94a3b8;margin-top:4px">How would you rate ElAlert?</p>`; },
+        confirmText: 'Submit Rating', showCancelButton: true, cancelText: 'Skip', onClose: showResult
+      });
+    };
+
+    window.demoAutoClose = () => {
+      let s = 5, t;
+      const h = Dialog.info({ title: 'Auto-Close Countdown', message: `Closing in ${s} seconds…`, autoClose: 5000, onClose: (r) => { clearInterval(t); showResult(r); } });
+      t = setInterval(() => { s--; if (s > 0) h.update({ message: `Closing in ${s} second${s > 1 ? 's' : ''}…` }); }, 1000);
+    };
+
+    window.demoNoBtn = () => {
+      let s = 3, t;
+      const h = Dialog.success({ title: 'Saved ✓', message: `Changes saved. Closing in ${s}s`, autoClose: 3000, showConfirmButton: false, onClose: (r) => { clearInterval(t); showResult(r); } });
+      t = setInterval(() => { s--; if (s > 0) h.update({ message: `Changes saved. Closing in ${s}s` }); }, 1000);
+    };
+
+    window.demoQueue = () => {
+      Dialog.info({ title: 'Step 1 / 3', message: 'Email verified successfully.' });
+      Dialog.warning({ title: 'Step 2 / 3', message: 'Profile setup is pending.' });
+      Dialog.success({ title: 'Step 3 / 3', message: 'All done! Welcome aboard.', onClose: showResult });
+    };
+
+    /* ---- Copy code ---- */
+    window.copyCode = () => {
+      navigator.clipboard?.writeText(document.getElementById('code-sample').innerText);
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    };
+  </script>
+</body>
+
+</html>

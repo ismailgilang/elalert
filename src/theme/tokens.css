@@ -1,0 +1,595 @@
+/* =============================================================================
+   @el-alert/dialog — Design Tokens & Component Styles
+   v0.1.0
+   
+   Import: import '@el-alert/dialog/style.css';
+   Custom: Override --dlg-* variables at :root or [data-dialog-theme="dark"]
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------
+   1. Design Tokens (CSS Custom Properties)
+   ----------------------------------------------------------------------- */
+
+:root {
+  /* Colors — Light Mode */
+  --dlg-color-overlay: rgba(0, 0, 0, 0.48);
+  --dlg-color-surface: #ffffff;
+  --dlg-color-surface-alt: #f8f9fa;
+  --dlg-color-border: rgba(0, 0, 0, 0.08);
+  --dlg-color-text-primary: #111827;
+  --dlg-color-text-secondary: #4b5563;
+  --dlg-color-text-muted: #9ca3af;
+
+  /* Icon colors */
+  --dlg-color-success: #16a34a;
+  --dlg-color-success-bg: #dcfce7;
+  --dlg-color-error: #dc2626;
+  --dlg-color-error-bg: #fee2e2;
+  --dlg-color-warning: #d97706;
+  --dlg-color-warning-bg: #fef3c7;
+  --dlg-color-info: #2563eb;
+  --dlg-color-info-bg: #dbeafe;
+  --dlg-color-question: #7c3aed;
+  --dlg-color-question-bg: #ede9fe;
+  --dlg-color-loading: #6b7280;
+  --dlg-color-loading-bg: #f3f4f6;
+
+  /* Button */
+  --dlg-btn-primary-bg: #111827;
+  --dlg-btn-primary-text: #ffffff;
+  --dlg-btn-primary-hover: #1f2937;
+  --dlg-btn-cancel-bg: transparent;
+  --dlg-btn-cancel-text: #4b5563;
+  --dlg-btn-cancel-border: #d1d5db;
+  --dlg-btn-cancel-hover-bg: #f9fafb;
+
+  /* Spacing */
+  --dlg-space-1: 4px;
+  --dlg-space-2: 8px;
+  --dlg-space-3: 12px;
+  --dlg-space-4: 16px;
+  --dlg-space-5: 20px;
+  --dlg-space-6: 24px;
+  --dlg-space-8: 32px;
+
+  /* Typography */
+  --dlg-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --dlg-font-size-title: 1.125rem;
+  --dlg-font-size-message: 0.9375rem;
+  --dlg-font-size-btn: 0.9375rem;
+  --dlg-font-weight-title: 600;
+  --dlg-font-weight-message: 400;
+  --dlg-line-height: 1.6;
+
+  /* Border */
+  --dlg-radius-dialog: 16px;
+  --dlg-radius-btn: 8px;
+  --dlg-shadow: 0 20px 60px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+
+  /* Sizes */
+  --dlg-max-width: 440px;
+  --dlg-btn-height: 42px;
+  --dlg-icon-size: 56px;
+
+  /* Z-index (base — dinaikkan oleh JS per instance) */
+  --dlg-z-overlay: 1000;
+  --dlg-z-dialog: 1001;
+
+  /* Transitions */
+  --dlg-duration-enter: 220ms;
+  --dlg-duration-exit: 160ms;
+  --dlg-easing-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --dlg-easing-exit: cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* -----------------------------------------------------------------------
+   2. Dark Mode — auto (prefers-color-scheme)
+   ----------------------------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --dlg-color-overlay: rgba(0, 0, 0, 0.64);
+    --dlg-color-surface: #1e1e2e;
+    --dlg-color-surface-alt: #2a2a3e;
+    --dlg-color-border: rgba(255, 255, 255, 0.08);
+    --dlg-color-text-primary: #f1f5f9;
+    --dlg-color-text-secondary: #94a3b8;
+    --dlg-color-text-muted: #64748b;
+
+    --dlg-color-success: #4ade80;
+    --dlg-color-success-bg: rgba(74, 222, 128, 0.12);
+    --dlg-color-error: #f87171;
+    --dlg-color-error-bg: rgba(248, 113, 113, 0.12);
+    --dlg-color-warning: #fbbf24;
+    --dlg-color-warning-bg: rgba(251, 191, 36, 0.12);
+    --dlg-color-info: #60a5fa;
+    --dlg-color-info-bg: rgba(96, 165, 250, 0.12);
+    --dlg-color-question: #a78bfa;
+    --dlg-color-question-bg: rgba(167, 139, 250, 0.12);
+    --dlg-color-loading: #94a3b8;
+    --dlg-color-loading-bg: rgba(148, 163, 184, 0.12);
+
+    --dlg-btn-primary-bg: #f1f5f9;
+    --dlg-btn-primary-text: #0f172a;
+    --dlg-btn-primary-hover: #e2e8f0;
+    --dlg-btn-cancel-bg: transparent;
+    --dlg-btn-cancel-text: #94a3b8;
+    --dlg-btn-cancel-border: rgba(255, 255, 255, 0.12);
+    --dlg-btn-cancel-hover-bg: rgba(255, 255, 255, 0.06);
+
+    --dlg-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* -----------------------------------------------------------------------
+   3. Manual theme override
+   ----------------------------------------------------------------------- */
+
+[data-dialog-theme="dark"] {
+  --dlg-color-overlay: rgba(0, 0, 0, 0.64);
+  --dlg-color-surface: #1e1e2e;
+  --dlg-color-surface-alt: #2a2a3e;
+  --dlg-color-border: rgba(255, 255, 255, 0.08);
+  --dlg-color-text-primary: #f1f5f9;
+  --dlg-color-text-secondary: #94a3b8;
+  --dlg-btn-primary-bg: #f1f5f9;
+  --dlg-btn-primary-text: #0f172a;
+  --dlg-btn-cancel-text: #94a3b8;
+  --dlg-btn-cancel-border: rgba(255, 255, 255, 0.12);
+  --dlg-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+[data-dialog-theme="light"] {
+  --dlg-color-overlay: rgba(0, 0, 0, 0.48);
+  --dlg-color-surface: #ffffff;
+  --dlg-color-text-primary: #111827;
+  --dlg-color-text-secondary: #4b5563;
+  --dlg-btn-primary-bg: #111827;
+  --dlg-btn-primary-text: #ffffff;
+}
+
+/* -----------------------------------------------------------------------
+   4. Base reset for dialog elements
+   ----------------------------------------------------------------------- */
+
+[data-dialog-root] *,
+[data-dialog-root] *::before,
+[data-dialog-root] *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* -----------------------------------------------------------------------
+   5. Overlay
+   ----------------------------------------------------------------------- */
+
+.dlg-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--dlg-space-4);
+  background-color: var(--dlg-color-overlay);
+  font-family: var(--dlg-font-family);
+  -webkit-font-smoothing: antialiased;
+  /* z-index set by JS */
+}
+
+/* Backdrop blur (opsional via config.backdropBlur) */
+[data-backdrop-blur].dlg-overlay {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* -----------------------------------------------------------------------
+   6. Dialog Container
+   ----------------------------------------------------------------------- */
+
+.dlg-container {
+  position: relative;
+  width: 100%;
+  max-width: var(--dlg-max-width);
+  background-color: var(--dlg-color-surface);
+  border-radius: var(--dlg-radius-dialog);
+  box-shadow: var(--dlg-shadow);
+  border: 1px solid var(--dlg-color-border);
+  overflow: hidden;
+  /* z-index set by JS */
+  outline: none;
+}
+
+/* -----------------------------------------------------------------------
+   7. Dialog Body
+   ----------------------------------------------------------------------- */
+
+.dlg-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--dlg-space-8) var(--dlg-space-6) var(--dlg-space-6);
+  gap: var(--dlg-space-4);
+}
+
+.dlg-title {
+  font-size: var(--dlg-font-size-title);
+  font-weight: var(--dlg-font-weight-title);
+  color: var(--dlg-color-text-primary);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.dlg-message {
+  font-size: var(--dlg-font-size-message);
+  font-weight: var(--dlg-font-weight-message);
+  color: var(--dlg-color-text-secondary);
+  line-height: var(--dlg-line-height);
+}
+
+/* -----------------------------------------------------------------------
+   8. Icon
+   ----------------------------------------------------------------------- */
+
+.dlg-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--dlg-icon-size);
+  height: var(--dlg-icon-size);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dlg-icon {
+  width: 32px;
+  height: 32px;
+}
+
+/* Success */
+.dlg-icon-wrap--success {
+  background-color: var(--dlg-color-success-bg);
+  color: var(--dlg-color-success);
+}
+
+/* Error */
+.dlg-icon-wrap--error {
+  background-color: var(--dlg-color-error-bg);
+  color: var(--dlg-color-error);
+}
+
+/* Warning */
+.dlg-icon-wrap--warning {
+  background-color: var(--dlg-color-warning-bg);
+  color: var(--dlg-color-warning);
+}
+
+/* Info */
+.dlg-icon-wrap--info {
+  background-color: var(--dlg-color-info-bg);
+  color: var(--dlg-color-info);
+}
+
+/* Question */
+.dlg-icon-wrap--question {
+  background-color: var(--dlg-color-question-bg);
+  color: var(--dlg-color-question);
+}
+
+/* Loading */
+.dlg-icon-wrap--loading {
+  background-color: var(--dlg-color-loading-bg);
+  color: var(--dlg-color-loading);
+}
+
+/* -----------------------------------------------------------------------
+   9. Custom content slot
+   ----------------------------------------------------------------------- */
+
+.dlg-content:not(:empty) {
+  padding: 0 var(--dlg-space-6) var(--dlg-space-4);
+  width: 100%;
+}
+
+/* -----------------------------------------------------------------------
+   10. Action buttons
+   ----------------------------------------------------------------------- */
+
+.dlg-actions {
+  display: flex;
+  gap: var(--dlg-space-3);
+  padding: var(--dlg-space-5) var(--dlg-space-6) var(--dlg-space-6);
+  border-top: 1px solid var(--dlg-color-border);
+}
+
+.dlg-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--dlg-btn-height);
+  padding: 0 var(--dlg-space-5);
+  border-radius: var(--dlg-radius-btn);
+  font-family: var(--dlg-font-family);
+  font-size: var(--dlg-font-size-btn);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 120ms ease, transform 80ms ease, box-shadow 120ms ease;
+  border: none;
+  outline: none;
+  user-select: none;
+  letter-spacing: 0.01em;
+}
+
+.dlg-btn:focus-visible {
+  outline: 2px solid var(--dlg-color-info);
+  outline-offset: 2px;
+}
+
+.dlg-btn:active {
+  transform: scale(0.97);
+}
+
+/* Confirm / Primary */
+.dlg-btn--confirm {
+  background-color: var(--dlg-btn-primary-bg);
+  color: var(--dlg-btn-primary-text);
+}
+
+.dlg-btn--confirm:hover {
+  background-color: var(--dlg-btn-primary-hover);
+}
+
+/* Confirm variant colors berdasarkan icon type */
+.dlg-btn--confirm[data-variant="success"] { background-color: var(--dlg-color-success); }
+.dlg-btn--confirm[data-variant="success"]:hover { filter: brightness(1.1); }
+.dlg-btn--confirm[data-variant="error"] { background-color: var(--dlg-color-error); color: #fff; }
+.dlg-btn--confirm[data-variant="error"]:hover { filter: brightness(1.1); }
+.dlg-btn--confirm[data-variant="warning"] { background-color: var(--dlg-color-warning); color: #fff; }
+.dlg-btn--confirm[data-variant="warning"]:hover { filter: brightness(1.1); }
+.dlg-btn--confirm[data-variant="info"] { background-color: var(--dlg-color-info); color: #fff; }
+.dlg-btn--confirm[data-variant="info"]:hover { filter: brightness(1.1); }
+.dlg-btn--confirm[data-variant="question"] { background-color: var(--dlg-color-question); color: #fff; }
+.dlg-btn--confirm[data-variant="question"]:hover { filter: brightness(1.1); }
+
+/* Cancel / Secondary */
+.dlg-btn--cancel {
+  background-color: var(--dlg-btn-cancel-bg);
+  color: var(--dlg-btn-cancel-text);
+  border: 1.5px solid var(--dlg-btn-cancel-border);
+}
+
+.dlg-btn--cancel:hover {
+  background-color: var(--dlg-btn-cancel-hover-bg);
+}
+
+/* -----------------------------------------------------------------------
+   11. Accessibility — screen-reader only utility
+   ----------------------------------------------------------------------- */
+
+.dlg-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* -----------------------------------------------------------------------
+   12. Animations
+   ----------------------------------------------------------------------- */
+
+/* Overlay */
+@keyframes dlg-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dlg-overlay-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Dialog container */
+@keyframes dlg-dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes dlg-dialog-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+}
+
+/* Error icon shake */
+@keyframes dlg-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+/* Warning icon pulse */
+@keyframes dlg-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
+/* Loading spinner */
+@keyframes dlg-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Success checkmark draw-in */
+@keyframes dlg-check-draw {
+  from { stroke-dashoffset: 50; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* -----------------------------------------------------------------------
+   13. State-based animation application
+   ----------------------------------------------------------------------- */
+
+/* Overlay states */
+.dlg-overlay[data-state="entering"] {
+  animation: dlg-overlay-in var(--dlg-duration-enter) var(--dlg-easing-enter) forwards;
+}
+
+.dlg-overlay[data-state="entered"] {
+  opacity: 1;
+}
+
+.dlg-overlay[data-state="exiting"] {
+  animation: dlg-overlay-out var(--dlg-duration-exit) var(--dlg-easing-exit) forwards;
+}
+
+.dlg-overlay[data-state="exited"] {
+  display: none;
+}
+
+/* Container states */
+.dlg-container[data-state="entering"] {
+  animation: dlg-dialog-in var(--dlg-duration-enter) var(--dlg-easing-enter) forwards;
+}
+
+.dlg-container[data-state="entered"] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.dlg-container[data-state="exiting"] {
+  animation: dlg-dialog-out var(--dlg-duration-exit) var(--dlg-easing-exit) forwards;
+}
+
+/* Icon animations pada state entered */
+.dlg-container[data-state="entered"] .dlg-icon-wrap--error .dlg-icon {
+  animation: dlg-shake 400ms ease-in-out;
+}
+
+.dlg-container[data-state="entered"] .dlg-icon-wrap--warning .dlg-icon {
+  animation: dlg-pulse 500ms ease-out;
+}
+
+.dlg-container[data-state="entered"] .dlg-icon-wrap--loading .dlg-icon {
+  animation: dlg-spin 800ms linear infinite;
+}
+
+.dlg-container[data-state="entered"] .dlg-icon-wrap--success .dlg-icon__check {
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: dlg-check-draw 450ms ease-out 100ms forwards;
+}
+
+/* -----------------------------------------------------------------------
+   14. Reduced motion overrides
+   ----------------------------------------------------------------------- */
+
+[data-reduced-motion] .dlg-overlay[data-state="entering"],
+[data-reduced-motion] .dlg-container[data-state="entering"] {
+  animation: none;
+  opacity: 1;
+}
+
+[data-reduced-motion] .dlg-overlay[data-state="exiting"],
+[data-reduced-motion] .dlg-container[data-state="exiting"] {
+  animation: none;
+  opacity: 0;
+}
+
+[data-reduced-motion] .dlg-icon-wrap--error .dlg-icon,
+[data-reduced-motion] .dlg-icon-wrap--warning .dlg-icon,
+[data-reduced-motion] .dlg-icon-wrap--loading .dlg-icon {
+  animation: none;
+}
+
+[data-reduced-motion] .dlg-icon__check {
+  animation: none !important;
+  stroke-dashoffset: 0;
+}
+
+/* -----------------------------------------------------------------------
+   15. Responsive — mobile
+   ----------------------------------------------------------------------- */
+
+@media (max-width: 480px) {
+  .dlg-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .dlg-container {
+    max-width: 100%;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .dlg-actions {
+    flex-direction: column-reverse;
+  }
+
+  /* Mobile: slide up instead of scale */
+  @keyframes dlg-dialog-in-mobile {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes dlg-dialog-out-mobile {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+  }
+
+  .dlg-container[data-state="entering"] {
+    animation: dlg-dialog-in-mobile var(--dlg-duration-enter) var(--dlg-easing-enter) forwards;
+  }
+
+  .dlg-container[data-state="exiting"] {
+    animation: dlg-dialog-out-mobile var(--dlg-duration-exit) var(--dlg-easing-exit) forwards;
+  }
+}
+
+/* -----------------------------------------------------------------------
+   16. Positions
+   ----------------------------------------------------------------------- */
+
+.dlg-overlay[data-dialog-position="top"] { align-items: flex-start; justify-content: center; }
+.dlg-overlay[data-dialog-position="bottom"] { align-items: flex-end; justify-content: center; }
+.dlg-overlay[data-dialog-position="top-left"] { align-items: flex-start; justify-content: flex-start; }
+.dlg-overlay[data-dialog-position="top-right"] { align-items: flex-start; justify-content: flex-end; }
+.dlg-overlay[data-dialog-position="bottom-left"] { align-items: flex-end; justify-content: flex-start; }
+.dlg-overlay[data-dialog-position="bottom-right"] { align-items: flex-end; justify-content: flex-end; }
+.dlg-overlay[data-dialog-position="center-left"] { align-items: center; justify-content: flex-start; }
+.dlg-overlay[data-dialog-position="center-right"] { align-items: center; justify-content: flex-end; }
+

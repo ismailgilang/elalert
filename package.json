@@ -1,0 +1,69 @@
+{
+  "name": "@maellana25/elalert",
+  "version": "0.1.0",
+  "description": "Lightweight, accessible, framework-agnostic dialog/modal/alert library",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./style.css": "./dist/style.css",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "tsc --emitDeclarationOnly && vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0",
+    "vite-plugin-dts": "^4.0.3",
+    "vitest": "^2.0.5",
+    "@testing-library/dom": "^10.4.0",
+    "jsdom": "^25.0.0",
+    "@vitest/coverage-v8": "^2.0.5",
+    "eslint": "^9.9.0",
+    "@typescript-eslint/eslint-plugin": "^8.1.0",
+    "@typescript-eslint/parser": "^8.1.0"
+  },
+  "peerDependencies": {},
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "dialog",
+    "modal",
+    "alert",
+    "confirm",
+    "toast",
+    "accessibility",
+    "typescript",
+    "framework-agnostic",
+    "zero-dependency"
+  ],
+  "license": "MIT",
+  "allowScripts": {
+    "esbuild@0.21.5": true
+  }
+}
