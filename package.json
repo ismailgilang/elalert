@@ -24,6 +24,7 @@
   "scripts": {
     "dev": "vite build --watch",
     "build": "tsc --emitDeclarationOnly && vite build",
+    "build:docs": "vite build -c vite.docs.config.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "test": "vitest run",
