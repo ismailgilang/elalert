@@ -2,7 +2,7 @@ import { openDialog } from '../core/controller';
 import type { DialogOptions } from '../types/options';
 import type { DialogHandle } from '../types/result';
 
-export interface LoadingOptions extends Pick<DialogOptions, 'title' | 'message' | 'theme' | 'allowEscapeKey'> {}
+export type LoadingOptions = Pick<DialogOptions, 'title' | 'message' | 'theme' | 'allowEscapeKey'>;
 
 /**
  * Membuka dialog loading (spinner) tanpa tombol.
