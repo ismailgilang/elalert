@@ -1,6 +1,6 @@
 {
   "name": "@maellana25/elalert",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lightweight, accessible, framework-agnostic dialog/modal/alert library",
   "type": "module",
   "main": "./dist/index.cjs",
