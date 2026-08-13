@@ -325,4 +325,4 @@ async function onSave() {
 
 ## 📄 License
 
-MIT © [maellana25](https://github.com/maellana25)
+MIT © [ismailgilang](https://github.com/ismailgilang/elalert)

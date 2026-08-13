@@ -63,6 +63,14 @@
     "zero-dependency"
   ],
   "license": "MIT",
+  "homepage": "https://github.com/ismailgilang/elalert#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ismailgilang/elalert.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ismailgilang/elalert/issues"
+  },
   "allowScripts": {
     "esbuild@0.21.5": true
   }
