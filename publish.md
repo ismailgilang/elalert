@@ -16,10 +16,10 @@
         ↓
 9. ✅ Publish ke npm
         ↓
-10. 🧪 Test npm install
+10. ✅ Test npm install
         ↓
 11. ✅ Rapikan README
         ↓
-12. 🔄 Versioning & release
+12. ✅ Versioning & release
         ↓
-13. ⚙️ CI/CD
+13. ✅ CI/CD
