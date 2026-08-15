@@ -183,6 +183,11 @@
   -webkit-backdrop-filter: blur(4px);
 }
 
+/* Overlay tanpa dim (showOverlay: false) */
+.dlg-overlay[data-show-overlay="false"] {
+  background-color: transparent;
+}
+
 /* -----------------------------------------------------------------------
    6. Dialog Container
    ----------------------------------------------------------------------- */
@@ -592,4 +597,136 @@
 .dlg-overlay[data-dialog-position="bottom-right"] { align-items: flex-end; justify-content: flex-end; }
 .dlg-overlay[data-dialog-position="center-left"] { align-items: center; justify-content: flex-start; }
 .dlg-overlay[data-dialog-position="center-right"] { align-items: center; justify-content: flex-end; }
+
+/* -----------------------------------------------------------------------
+   17. Toast style — notification bertumpuk di tray, bisa di-swipe untuk dibuang
+   ----------------------------------------------------------------------- */
+
+.dlg-toast-tray {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dlg-space-3);
+  padding: var(--dlg-space-4);
+  pointer-events: none;
+  /* z-index di-set oleh JS */
+}
+
+.dlg-toast-tray[data-dialog-position="top"] { align-items: center; justify-content: flex-start; }
+.dlg-toast-tray[data-dialog-position="top-left"] { align-items: flex-start; justify-content: flex-start; }
+.dlg-toast-tray[data-dialog-position="top-right"] { align-items: flex-end; justify-content: flex-start; }
+.dlg-toast-tray[data-dialog-position="bottom"] { align-items: center; justify-content: flex-end; }
+.dlg-toast-tray[data-dialog-position="bottom-left"] { align-items: flex-start; justify-content: flex-end; }
+.dlg-toast-tray[data-dialog-position="bottom-right"] { align-items: flex-end; justify-content: flex-end; }
+.dlg-toast-tray[data-dialog-position="center"] { align-items: center; justify-content: center; }
+.dlg-toast-tray[data-dialog-position="center-left"] { align-items: flex-start; justify-content: center; }
+.dlg-toast-tray[data-dialog-position="center-right"] { align-items: flex-end; justify-content: center; }
+
+.dlg-toast-item {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  flex-shrink: 0;
+  pointer-events: auto;
+  background-color: var(--dlg-color-surface);
+  border: 1px solid var(--dlg-color-border);
+  border-radius: var(--dlg-radius-dialog);
+  box-shadow: var(--dlg-shadow);
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  /* Animasi membuka/menutup tumpukan saat hover */
+  transition: margin-top 0.3s ease;
+}
+
+.dlg-toast-item:active {
+  cursor: grabbing;
+}
+
+/* Layout horizontal: icon kiri, teks kanan */
+.dlg-toast-item .dlg-body {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  gap: var(--dlg-space-3);
+  padding: var(--dlg-space-4) var(--dlg-space-5);
+}
+
+.dlg-toast-item .dlg-icon-wrap {
+  width: 44px;
+  height: 44px;
+}
+
+.dlg-toast-item .dlg-icon {
+  width: 26px;
+  height: 26px;
+}
+
+.dlg-toast-item .dlg-actions {
+  padding: 0 var(--dlg-space-5) var(--dlg-space-4);
+  border-top: none;
+}
+
+/* Animasi slide dari kanan */
+@keyframes dlg-toast-in {
+  from { opacity: 0; transform: translateX(28px) scale(0.98); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes dlg-toast-out {
+  from { opacity: 1; transform: translateX(0) scale(1); }
+  to { opacity: 0; transform: translateX(28px) scale(0.98); }
+}
+
+.dlg-toast-item[data-state="entering"] {
+  animation: dlg-toast-in var(--dlg-duration-enter) var(--dlg-easing-enter) forwards;
+}
+
+.dlg-toast-item[data-state="entered"] {
+  opacity: 1;
+}
+
+.dlg-toast-item[data-state="exiting"] {
+  animation: dlg-toast-out var(--dlg-duration-exit) var(--dlg-easing-exit) forwards;
+}
+
+.dlg-toast-item[data-state="exited"] {
+  display: none;
+}
+
+/* Skip animasi exit saat di-swipe (item sudah digeser keluar via inline style) */
+.dlg-toast-item--swiped[data-state="exiting"] {
+  animation: none !important;
+}
+
+/* Reduced motion */
+[data-reduced-motion] .dlg-toast-item[data-state="entering"] {
+  animation: none;
+  opacity: 1;
+}
+
+[data-reduced-motion] .dlg-toast-item[data-state="exiting"] {
+  animation: none;
+  opacity: 0;
+}
+
+/* Jangan blur backdrop untuk toast */
+[data-backdrop-blur].dlg-overlay[data-dialog-style="toast"] {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .dlg-toast-tray {
+    padding: var(--dlg-space-2);
+  }
+
+  .dlg-toast-item {
+    max-width: 100%;
+  }
+}
 

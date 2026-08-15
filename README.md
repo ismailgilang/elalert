@@ -190,7 +190,10 @@ Dialog.setConfig({
 | `title` | `string` | — | Dialog title |
 | `message` | `string` | — | Main message text (plain text, not HTML) |
 | `icon` | `DialogIconType` | `'none'` | Icon to display |
-| `position` | `DialogPosition` | `'center'` | Position on screen |
+| `position` | `DialogPosition` | `'center'` | Position on screen (`'top-right'` default untuk toast) |
+| `style` | `DialogStyle` | `'modal'` | Tampilan dialog: `'modal'` (centered + backdrop) atau `'toast'` (notification tanpa backdrop) |
+| `showOverlay` | `boolean` | `true` | Tampilkan backdrop/overlay di belakang dialog (`false` = tanpa dim, halaman tetap terlihat) |
+| `overlayColor` | `string` | — | Warna custom backdrop (CSS color); mengikuti tema jika tidak diset |
 | `theme` | `DialogTheme` | `'auto'` | `'light'` / `'dark'` / `'auto'` |
 | `confirmText` | `string` | `'OK'` | Primary button text |
 | `cancelText` | `string` | `'Cancel'` | Secondary button text |
@@ -254,6 +257,25 @@ Dialog.info({ title: 'Step 1 / 3', message: 'Email verified.' });
 Dialog.warning({ title: 'Step 2 / 3', message: 'Profile pending.' });
 Dialog.success({ title: 'Step 3 / 3', message: 'Welcome aboard!' });
 ```
+
+---
+
+## 🍞 Toast Style
+
+Render dialog apa pun sebagai toast notification — tanpa backdrop, halaman tetap interaktif, dan slide-in dari tepi layar:
+
+```ts
+Dialog.success({
+  title: 'Saved!',
+  message: 'Data has been saved.',
+  style: 'toast',          // 'modal' (default) | 'toast'
+  position: 'top-right',
+  autoClose: 3000,
+  showConfirmButton: false,
+});
+```
+
+Toast tidak mencuri fokus dari halaman (fokus trap & `aria-modal` dinonaktifkan) dan menggunakan role `status`/`alert` + `aria-live` agar dibaca screen reader sebagai notifikasi.
 
 ---
 

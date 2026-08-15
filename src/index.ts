@@ -49,6 +49,7 @@ export type {
   DialogConfig,
   DialogIconType,
   DialogTheme,
+  DialogStyle,
   PartialDialogOptions,
 } from './types/options';
 

@@ -13,6 +13,9 @@ export type DialogIconType =
 /** Preferensi tema tampilan dialog */
 export type DialogTheme = 'light' | 'dark' | 'auto';
 
+/** Gaya tampilan dialog */
+export type DialogStyle = 'modal' | 'toast';
+
 /** Posisi tata letak dialog di layar */
 export type DialogPosition =
   | 'center'
@@ -27,8 +30,24 @@ export type DialogPosition =
 
 /** Konfigurasi opsi untuk membuka dialog */
 export interface DialogOptions {
-  /** Posisi dialog di layar. Default: 'center' */
+  /** Posisi dialog di layar. Default: 'center' ('top-right' untuk toast) */
   position?: DialogPosition;
+
+  /**
+   * Gaya tampilan dialog.
+   * - 'modal': centered dengan backdrop (default)
+   * - 'toast': notification tanpa backdrop, halaman tetap interaktif
+   */
+  style?: DialogStyle;
+
+  /**
+   * Apakah backdrop/overlay ditampilkan. Default: true.
+   * Set false untuk dialog tanpa dim — halaman tetap terlihat (klik luar masih menutup).
+   */
+  showOverlay?: boolean;
+
+  /** Warna custom backdrop (CSS color). Default: mengikuti tema (--dlg-color-overlay). */
+  overlayColor?: string;
 
   /** Judul dialog. Jika tidak diset, section judul tidak dirender. */
   title?: string;

@@ -18,18 +18,27 @@ import type { DialogOptions } from '../types/options';
 export function setupAria(elements: DialogElements, options: DialogOptions): void {
   const { container, title, message } = elements;
   const icon = options.icon ?? 'none';
+  const style = options.style ?? 'modal';
 
   // Pilih role berdasarkan tipe dialog
-  const isAlertDialog = icon === 'error' || icon === 'warning';
-  container.setAttribute('role', isAlertDialog ? 'alertdialog' : 'dialog');
-  container.setAttribute('aria-modal', 'true');
+  const isAlert = icon === 'error' || icon === 'warning';
 
-  if (title !== null) {
-    container.setAttribute('aria-labelledby', title.id);
-  }
+  if (style === 'toast') {
+    // Toast = notification: gunakan live region, bukan dialog modal
+    container.setAttribute('role', isAlert ? 'alert' : 'status');
+    container.setAttribute('aria-live', 'polite');
+    container.setAttribute('aria-atomic', 'true');
+  } else {
+    container.setAttribute('role', isAlert ? 'alertdialog' : 'dialog');
+    container.setAttribute('aria-modal', 'true');
 
-  if (message !== null) {
-    container.setAttribute('aria-describedby', message.id);
+    if (title !== null) {
+      container.setAttribute('aria-labelledby', title.id);
+    }
+
+    if (message !== null) {
+      container.setAttribute('aria-describedby', message.id);
+    }
   }
 
   // Live region untuk loading dialog agar screen reader membaca update

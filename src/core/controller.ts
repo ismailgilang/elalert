@@ -4,6 +4,7 @@ import {
   getInstance,
   removeInstance,
   getTopInstance,
+  getAllInstances,
   getConfig,
   enqueue,
   dequeue,
@@ -69,6 +70,8 @@ function mergeWithDefaults(options: DialogOptions): DialogOptions {
     autoClose: 0,
     theme: config.theme,
     position: config.position,
+    style: 'modal',
+    showOverlay: true,
     ...options,
   };
 }
@@ -105,14 +108,18 @@ export function openDialog<T = unknown>(
 
   const config = getConfig();
 
-  // Cek apakah ada dialog aktif dan mode queue
-  const activeExists =
-    config.queueBehavior === 'queue' &&
-    [...(getTopInstance() ? [getTopInstance()!] : [])].some(
-      (i) => i.state === 'entered' || i.state === 'entering',
-    );
+  // Toast selalu tampil langsung & bertumpuk di tray (tidak perlu antri)
+  const isToast = options.style === 'toast';
 
-  if (activeExists) {
+  // Modal menunggu giliran jika ada modal lain yang aktif/menutup
+  const hasBusyModal = [...getAllInstances().values()].some(
+    (i) => i.options.style !== 'toast'
+      && (i.state === 'entering' || i.state === 'entered' || i.state === 'exiting'),
+  );
+
+  const shouldQueue = !isToast && hasBusyModal && config.queueBehavior === 'queue';
+
+  if (shouldQueue) {
     // Masukkan ke antrian
     enqueue(id);
   } else {
@@ -160,17 +167,20 @@ async function mountDialog(
     elements.overlay.setAttribute('data-state', 'entering');
     elements.container.setAttribute('data-state', 'entering');
 
-    // Setelah animasi selesai
-    elements.container.addEventListener(
-      'animationend',
-      () => {
-        instance.state = 'entered';
-        instance.emitter.emit('stateChange', 'entered');
-        elements.overlay.setAttribute('data-state', 'entered');
-        elements.container.setAttribute('data-state', 'entered');
-      },
-      { once: true },
-    );
+    // Setelah animasi selesai — dengan fallback jika animationend tidak terjadi
+    // (reduced motion / animasi di-skip) agar state tidak terjebak 'entering'
+    let settled = false;
+    const markEntered = () => {
+      if (settled) return;
+      settled = true;
+      if (instance.state !== 'entering') return;
+      instance.state = 'entered';
+      instance.emitter.emit('stateChange', 'entered');
+      elements.overlay.setAttribute('data-state', 'entered');
+      elements.container.setAttribute('data-state', 'entered');
+    };
+    elements.container.addEventListener('animationend', markEntered, { once: true });
+    setTimeout(markEntered, 250); // fallback
   });
 
   // Setup autoClose
@@ -234,10 +244,19 @@ async function unmountDialog(instance: DialogInstance): Promise<void> {
       setTimeout(resolve, 300);
     });
 
-    // Restore focus sebelum hapus DOM
-    restoreFocus(elements);
+    // Restore focus hanya untuk modal (toast tidak mencuri fokus)
+    if (instance.options.style !== 'toast') {
+      restoreFocus(elements);
+    }
 
+    const toastTray = elements.overlay.parentElement;
     elements.overlay.remove();
+
+    // Bersihkan tray toast yang sudah kosong
+    if (instance.options.style === 'toast' && toastTray !== null) {
+      const renderer = await getRenderer();
+      renderer.cleanupToastTray(toastTray);
+    }
   }
 
   instance.state = 'exited';
