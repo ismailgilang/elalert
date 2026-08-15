@@ -38,10 +38,12 @@
   --dlg-btn-primary-bg: #111827;
   --dlg-btn-primary-text: #ffffff;
   --dlg-btn-primary-hover: #1f2937;
-  --dlg-btn-cancel-bg: transparent;
+  --dlg-btn-cancel-bg: #f9fafb;
   --dlg-btn-cancel-text: #4b5563;
   --dlg-btn-cancel-border: #d1d5db;
-  --dlg-btn-cancel-hover-bg: #f9fafb;
+  --dlg-btn-cancel-hover-bg: #f1f5f9;
+  --dlg-btn-variant-text: #ffffff;
+  --dlg-btn-variant-hover-filter: brightness(0.92);
 
   /* Spacing */
   --dlg-space-1: 4px;
@@ -112,10 +114,12 @@
     --dlg-btn-primary-bg: #f1f5f9;
     --dlg-btn-primary-text: #0f172a;
     --dlg-btn-primary-hover: #e2e8f0;
-    --dlg-btn-cancel-bg: transparent;
+    --dlg-btn-cancel-bg: rgba(255, 255, 255, 0.04);
     --dlg-btn-cancel-text: #94a3b8;
     --dlg-btn-cancel-border: rgba(255, 255, 255, 0.12);
-    --dlg-btn-cancel-hover-bg: rgba(255, 255, 255, 0.06);
+    --dlg-btn-cancel-hover-bg: rgba(255, 255, 255, 0.08);
+    --dlg-btn-variant-text: #0f172a;
+    --dlg-btn-variant-hover-filter: brightness(1.12);
 
     --dlg-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
   }
@@ -132,20 +136,67 @@
   --dlg-color-border: rgba(255, 255, 255, 0.08);
   --dlg-color-text-primary: #f1f5f9;
   --dlg-color-text-secondary: #94a3b8;
+  --dlg-color-text-muted: #64748b;
+
+  --dlg-color-success: #4ade80;
+  --dlg-color-success-bg: rgba(74, 222, 128, 0.12);
+  --dlg-color-error: #f87171;
+  --dlg-color-error-bg: rgba(248, 113, 113, 0.12);
+  --dlg-color-warning: #fbbf24;
+  --dlg-color-warning-bg: rgba(251, 191, 36, 0.12);
+  --dlg-color-info: #60a5fa;
+  --dlg-color-info-bg: rgba(96, 165, 250, 0.12);
+  --dlg-color-question: #a78bfa;
+  --dlg-color-question-bg: rgba(167, 139, 250, 0.12);
+  --dlg-color-loading: #94a3b8;
+  --dlg-color-loading-bg: rgba(148, 163, 184, 0.12);
+
   --dlg-btn-primary-bg: #f1f5f9;
   --dlg-btn-primary-text: #0f172a;
+  --dlg-btn-primary-hover: #e2e8f0;
+  --dlg-btn-cancel-bg: rgba(255, 255, 255, 0.04);
   --dlg-btn-cancel-text: #94a3b8;
   --dlg-btn-cancel-border: rgba(255, 255, 255, 0.12);
+  --dlg-btn-cancel-hover-bg: rgba(255, 255, 255, 0.08);
+  --dlg-btn-variant-text: #0f172a;
+  --dlg-btn-variant-hover-filter: brightness(1.12);
+
   --dlg-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 [data-dialog-theme="light"] {
   --dlg-color-overlay: rgba(0, 0, 0, 0.48);
   --dlg-color-surface: #ffffff;
+  --dlg-color-surface-alt: #f8f9fa;
+  --dlg-color-border: rgba(0, 0, 0, 0.08);
   --dlg-color-text-primary: #111827;
   --dlg-color-text-secondary: #4b5563;
+  --dlg-color-text-muted: #9ca3af;
+
+  --dlg-color-success: #16a34a;
+  --dlg-color-success-bg: #dcfce7;
+  --dlg-color-error: #dc2626;
+  --dlg-color-error-bg: #fee2e2;
+  --dlg-color-warning: #d97706;
+  --dlg-color-warning-bg: #fef3c7;
+  --dlg-color-info: #2563eb;
+  --dlg-color-info-bg: #dbeafe;
+  --dlg-color-question: #7c3aed;
+  --dlg-color-question-bg: #ede9fe;
+  --dlg-color-loading: #6b7280;
+  --dlg-color-loading-bg: #f3f4f6;
+
   --dlg-btn-primary-bg: #111827;
   --dlg-btn-primary-text: #ffffff;
+  --dlg-btn-primary-hover: #1f2937;
+  --dlg-btn-cancel-bg: #f9fafb;
+  --dlg-btn-cancel-text: #4b5563;
+  --dlg-btn-cancel-border: #d1d5db;
+  --dlg-btn-cancel-hover-bg: #f1f5f9;
+  --dlg-btn-variant-text: #ffffff;
+  --dlg-btn-variant-hover-filter: brightness(0.92);
+
+  --dlg-shadow: 0 20px 60px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 /* -----------------------------------------------------------------------
@@ -347,16 +398,24 @@
 }
 
 /* Confirm variant colors berdasarkan icon type */
+.dlg-btn--confirm[data-variant="success"],
+.dlg-btn--confirm[data-variant="error"],
+.dlg-btn--confirm[data-variant="warning"],
+.dlg-btn--confirm[data-variant="info"],
+.dlg-btn--confirm[data-variant="question"] {
+  color: var(--dlg-btn-variant-text);
+}
+
 .dlg-btn--confirm[data-variant="success"] { background-color: var(--dlg-color-success); }
-.dlg-btn--confirm[data-variant="success"]:hover { filter: brightness(1.1); }
-.dlg-btn--confirm[data-variant="error"] { background-color: var(--dlg-color-error); color: #fff; }
-.dlg-btn--confirm[data-variant="error"]:hover { filter: brightness(1.1); }
-.dlg-btn--confirm[data-variant="warning"] { background-color: var(--dlg-color-warning); color: #fff; }
-.dlg-btn--confirm[data-variant="warning"]:hover { filter: brightness(1.1); }
-.dlg-btn--confirm[data-variant="info"] { background-color: var(--dlg-color-info); color: #fff; }
-.dlg-btn--confirm[data-variant="info"]:hover { filter: brightness(1.1); }
-.dlg-btn--confirm[data-variant="question"] { background-color: var(--dlg-color-question); color: #fff; }
-.dlg-btn--confirm[data-variant="question"]:hover { filter: brightness(1.1); }
+.dlg-btn--confirm[data-variant="success"]:hover { filter: var(--dlg-btn-variant-hover-filter); }
+.dlg-btn--confirm[data-variant="error"] { background-color: var(--dlg-color-error); }
+.dlg-btn--confirm[data-variant="error"]:hover { filter: var(--dlg-btn-variant-hover-filter); }
+.dlg-btn--confirm[data-variant="warning"] { background-color: var(--dlg-color-warning); }
+.dlg-btn--confirm[data-variant="warning"]:hover { filter: var(--dlg-btn-variant-hover-filter); }
+.dlg-btn--confirm[data-variant="info"] { background-color: var(--dlg-color-info); }
+.dlg-btn--confirm[data-variant="info"]:hover { filter: var(--dlg-btn-variant-hover-filter); }
+.dlg-btn--confirm[data-variant="question"] { background-color: var(--dlg-color-question); }
+.dlg-btn--confirm[data-variant="question"]:hover { filter: var(--dlg-btn-variant-hover-filter); }
 
 /* Cancel / Secondary */
 .dlg-btn--cancel {
